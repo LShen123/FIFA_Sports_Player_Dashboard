@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
 
-export default function AgeHistogram({ data, selectedRange, onBinSelect }) {
+export default function AgeHistogram({ data, selectedRange = [], onBinSelect }) {
   const svgRef = useRef();
 
   useEffect(() => {
@@ -14,15 +14,20 @@ export default function AgeHistogram({ data, selectedRange, onBinSelect }) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const ages = data.map(d => +d.age).filter(d => !isNaN(d) && d > 0);
+    const ages = data
+      .map(d => +d.age)
+      .filter(d => !isNaN(d) && d > 0);
+
+    const minAge = Math.floor(d3.min(ages));
+    const maxAge = Math.ceil(d3.max(ages));
 
     const xScale = d3.scaleLinear()
-      .domain([d3.min(ages) - 2, d3.max(ages) + 2])
+      .domain([minAge, maxAge])
       .range([margin.left, width - margin.right]);
 
     const histogram = d3.bin()
-      .domain(xScale.domain())
-      .thresholds(xScale.ticks(15));
+      .domain([minAge, maxAge])
+      .thresholds(d3.range(minAge, maxAge + 1, 1));
 
     const bins = histogram(ages);
 
@@ -33,7 +38,11 @@ export default function AgeHistogram({ data, selectedRange, onBinSelect }) {
 
     svg.append("g")
       .attr("transform", `translate(0,${height - margin.bottom})`)
-      .call(d3.axisBottom(xScale))
+      .call(
+        d3.axisBottom(xScale)
+          .ticks(maxAge - minAge)
+          .tickFormat(d3.format("d"))
+      )
       .append("text")
       .attr("x", width / 2)
       .attr("y", 35)
@@ -56,25 +65,28 @@ export default function AgeHistogram({ data, selectedRange, onBinSelect }) {
       .attr("fill", "var(--accent, #646cff)")
       //Dim unselected bars if a range is currently selected
       .style("opacity", d => {
-        if (!selectedRange) return 1;
-        const isSelected = selectedRange[0] === d.x0 && selectedRange[1] === d.x1;
+        if (!selectedRange || selectedRange.length === 0) return 1;
+
+        const isSelected = selectedRange.some(
+          r => r[0] === d.x0 && r[1] === d.x1
+        );
+
         return isSelected ? 1 : 0.3;
       })
       .style("cursor", "pointer")
       //Interaction logic
       .on("click", (event, d) => {
-        const isAlreadySelected = selectedRange && selectedRange[0] === d.x0 && selectedRange[1] === d.x1;
-        //Unselect Selected Bin
-        onBinSelect(isAlreadySelected ? null : [d.x0, d.x1]);
+        const range = [d.x0, d.x1];
+        onBinSelect(range);
       });
 
   }, [data, selectedRange, onBinSelect]);
 
   return (
-    <svg 
-      ref={svgRef} 
-      width={400} 
-      height={250} 
+    <svg
+      ref={svgRef}
+      width={400}
+      height={250}
       style={{ background: 'transparent' }}
     />
   );
