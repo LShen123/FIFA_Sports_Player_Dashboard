@@ -5,6 +5,7 @@ import AgeHistogram from "./components/AgeHistogram";
 import RatingHistogram from "./components/RatingsHistogram";
 import RatingValueScatter from "./components/RatingValueScatter";
 import ValuePositionScatter from "./components/ValuePositionScatter";
+import GoalsAssistsValueScatter from "./components/GoalsAssistsValueScatter";
 import PlayerTable from "./components/PlayerTable";
 import fifaCsvRaw from "./data/fifa_player_performance_market_value.csv?raw";
 
@@ -148,6 +149,21 @@ function App() {
           <h3>Market Value vs. Age by Position</h3>
           {fifaData.length > 0 ? (
             <ValuePositionScatter data={fifaData} />
+          ) : (
+            <p>Loading dataset...</p>
+          )}
+        </div>
+
+        <div className="card">
+          <h3>Attackers: Goals + Assists vs. Market Value</h3>
+          <p
+            style={{ color: "#9ca3af", fontSize: "14px", marginTop: "-0.3rem" }}
+          >
+            Compares RW, LW, and ST players by total goal contributions and
+            market value.
+          </p>
+          {fifaData.length > 0 ? (
+            <GoalsAssistsValueScatter data={fifaData} />
           ) : (
             <p>Loading dataset...</p>
           )}
