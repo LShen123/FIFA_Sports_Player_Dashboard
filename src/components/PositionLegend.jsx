@@ -23,7 +23,10 @@ const colorScale = d3.scaleOrdinal()
 
 export default function PositionLegend() {
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "10px", paddingLeft: "1rem" }}>
+      <h3 style={{ margin: 0, fontSize: "20px", color: "#9ca3af" }}>
+        Position Legend
+      </h3>
       {positions.map(pos => (
         <div
           key={pos}
@@ -32,7 +35,8 @@ export default function PositionLegend() {
             alignItems: "center",
             gap: "6px",
             fontSize: "14px",
-            color: "#e5e7eb"
+            color: "#e5e7eb",
+            whiteSpace: "nowrap"
           }}
         >
           <div
@@ -40,7 +44,8 @@ export default function PositionLegend() {
               width: "12px",
               height: "12px",
               backgroundColor: colorScale(pos),
-              borderRadius: "2px"
+              borderRadius: "2px",
+              flexShrink: 0
             }}
           />
           <span>
