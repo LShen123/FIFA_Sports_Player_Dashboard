@@ -52,7 +52,14 @@ export default function AgeHistogram({ data, selectedRange = [], onBinSelect }) 
 
     svg.append("g")
       .attr("transform", `translate(${margin.left},0)`)
-      .call(d3.axisLeft(yScale));
+      .call(d3.axisLeft(yScale))
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -height / 2)
+      .attr("y", -30)
+      .attr("fill", "var(--text-h, #000)")
+      .style("text-anchor", "middle")
+      .text("Player Count");
 
     svg.append("g")
       .selectAll("rect")

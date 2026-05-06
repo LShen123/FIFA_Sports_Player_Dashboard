@@ -122,7 +122,17 @@ function App() {
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
       <h1>FIFA Performance Dashboard</h1>
-
+      <p style={{ color: "#9ca3af", marginBottom: "2rem", marginTop: "-0.5rem" }}>
+        This dashboard contains an analysis of the following dataset: {" "}
+        <a 
+          href="https://www.kaggle.com/datasets/itszubi/fifa-player-performance-and-market-value" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{ color: "#60a5fa", textDecoration: "underline" }}
+        >
+          FIFA Soccer Player Dataset
+        </a>
+      </p>
       <div
         style={{
           display: "grid",
@@ -152,6 +162,7 @@ function App() {
             <p>Loading dataset...</p>
           )}
         </div>
+        <PositionLegend />
       </div>
 
       <div
@@ -187,7 +198,6 @@ function App() {
         </div>
       </div>
 
-      <PositionLegend />
           
       <div className="card" style={{ marginTop: "2rem" }}>
         <h3>Scouting Filters</h3>

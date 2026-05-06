@@ -87,7 +87,7 @@ export default function GoalsAssistsValueScatter({ data }) {
     const colorScale = d3
       .scaleOrdinal()
       .domain(["RW", "LW", "ST"])
-      .range(["#f59e0b", "#38bdf8", "#fb7185"]);
+      .range(["#7f7f7f", "#8c564b", "#bcbd22"]);
 
     const tooltip = d3
       .select("body")
