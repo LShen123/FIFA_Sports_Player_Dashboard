@@ -19,10 +19,6 @@ export default function ValuePositionScatter({ data }) {
     setSelectedPositions(new Set(positions));
   };
 
-  const clearAllPositions = () => {
-    setSelectedPositions(new Set());
-  };
-
   useEffect(() => {
     if (!data || data.length === 0) return;
 
@@ -214,20 +210,6 @@ export default function ValuePositionScatter({ data }) {
             }}
           >
             All
-          </button>
-          <button
-            onClick={clearAllPositions}
-            style={{
-              padding: "6px 12px",
-              borderRadius: "4px",
-              border: "1px solid #374151",
-              backgroundColor: "#1f2937",
-              color: "#e5e7eb",
-              cursor: "pointer",
-              fontSize: "12px",
-            }}
-          >
-            Clear
           </button>
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
