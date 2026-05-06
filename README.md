@@ -11,3 +11,7 @@ npm install
 npm start
 npm run dev
 ```
+
+Website can be found here
+
+https://lshen123.github.io/FIFA_Sports_Player_Dashboard/
