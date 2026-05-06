@@ -2,14 +2,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import * as d3 from 'd3';
 import AgeHistogram from './components/AgeHistogram';
-import RatingHistogram from './components/RatingsHistogram';
+import PositionBarChart from './components/PositionBarChart';
+import PositionLegend from './components/PositionLegend';
 import RatingValueScatter from './components/RatingValueScatter';
 import PlayerTable from './components/PlayerTable';
 import fifaCsvRaw from './data/fifa_player_performance_market_value.csv?raw';
 
 function App() {
   const [fifaData, setFifaData] = useState([]);
-  const [selectedAgeRange, setSelectedAgeRange] = useState(null);
+  //const [selectedAgeRange, setSelectedAgeRange] = useState(null);
+  const [selectedAgeRanges, setSelectedAgeRanges] = useState([]);
 
   const [selectedPosition, setSelectedPosition] = useState("");
   const [maxBudget, setMaxBudget] = useState(180);
@@ -35,13 +37,14 @@ function App() {
 
   // Filter the data based on the selected histogram bin
   const filteredData = useMemo(() => {
-    if (!selectedAgeRange) return fifaData;
-    
+    // If no bins are selected, return all data
+    if (selectedAgeRanges.length === 0) return fifaData;
     return fifaData.filter(d => {
       const age = +d.age;
-      return age >= selectedAgeRange[0] && age < selectedAgeRange[1];
+      // Keep the player if their age falls within ANY of the selected ranges
+      return selectedAgeRanges.some(range => age >= range[0] && age < range[1]);
     });
-  }, [fifaData, selectedAgeRange]);
+  }, [fifaData, selectedAgeRanges])
 
   // Get all available positions from the dataset
   const positions = useMemo(() => {
@@ -66,7 +69,20 @@ function App() {
   }, [fifaData, selectedPosition, maxBudget, selectedRisk, excludeInjuryProne]);
 
   const handleAgeSelect = (range) => {
-  setSelectedAgeRange(range);
+    if (!range) {
+      setSelectedAgeRanges([]);
+      return;
+    }
+
+    setSelectedAgeRanges(prev => {
+      const exists = prev.some(r => r[0] === range[0] && r[1] === range[1]);
+
+      if (exists) {
+        return prev.filter(r => !(r[0] === range[0] && r[1] === range[1]));
+      } else {
+        return [...prev, range];
+      }
+    });
   };
 
   const handlePositionChange = (position) => {
@@ -109,25 +125,27 @@ function App() {
           {fifaData.length > 0 ? (
             <AgeHistogram 
               data={fifaData} 
-              selectedRange={selectedAgeRange}
+              selectedRange={selectedAgeRanges}
               onBinSelect={handleAgeSelect} 
             />
           ) : (
             <p>Loading dataset...</p>
           )}
         </div>
-
         <div className="card">
-          <h3>Age vs. Overall Rating</h3>
+          <h3>Position Distribution</h3>
           {fifaData.length > 0 ? (
-            <RatingHistogram data={filteredData} />
+            <PositionBarChart data={filteredData} 
+              fullData={fifaData}
+            />
           ) : (
             <p>Loading dataset...</p>
           )}
         </div>
 
-      </div>
 
+      </div>
+          <PositionLegend />
       <div className="card" style={{ marginTop: '2rem' }}>
         <h3>Scouting Filters</h3>
 
