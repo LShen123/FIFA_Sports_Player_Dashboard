@@ -1,12 +1,14 @@
 // src/App.jsx
-import { useState, useEffect, useMemo } from 'react';
-import * as d3 from 'd3';
-import AgeHistogram from './components/AgeHistogram';
+import { useState, useEffect, useMemo } from "react";
+import * as d3 from "d3";
+import AgeHistogram from "./components/AgeHistogram";
 import PositionBarChart from './components/PositionBarChart';
 import PositionLegend from './components/PositionLegend';
-import RatingValueScatter from './components/RatingValueScatter';
-import PlayerTable from './components/PlayerTable';
-import fifaCsvRaw from './data/fifa_player_performance_market_value.csv?raw';
+import RatingValueScatter from "./components/RatingValueScatter";
+import ValuePositionScatter from "./components/ValuePositionScatter";
+import GoalsAssistsValueScatter from "./components/GoalsAssistsValueScatter";
+import PlayerTable from "./components/PlayerTable";
+import fifaCsvRaw from "./data/fifa_player_performance_market_value.csv?raw";
 
 function App() {
   const [fifaData, setFifaData] = useState([]);
@@ -26,7 +28,7 @@ function App() {
 
   const maxBudgetValue = useMemo(() => {
     if (fifaData.length === 0) return 180;
-    return Math.ceil(d3.max(fifaData, d => +d.market_value_million_eur));
+    return Math.ceil(d3.max(fifaData, (d) => +d.market_value_million_eur));
   }, [fifaData]);
 
   useEffect(() => {
@@ -48,20 +50,24 @@ function App() {
 
   // Get all available positions from the dataset
   const positions = useMemo(() => {
-    const uniquePositions = Array.from(new Set(fifaData.map(d => d.position))).sort();
+    const uniquePositions = Array.from(
+      new Set(fifaData.map((d) => d.position)),
+    ).sort();
     return ["All", ...uniquePositions];
   }, [fifaData]);
 
-  // Scouting Data 
+  // Scouting Data
   const scoutingData = useMemo(() => {
     if (!selectedPosition) return [];
 
-    return fifaData.filter(d => {
+    return fifaData.filter((d) => {
       const playerValue = +d.market_value_million_eur;
 
-      const positionMatch = selectedPosition === "All" || d.position === selectedPosition;
+      const positionMatch =
+        selectedPosition === "All" || d.position === selectedPosition;
       const budgetMatch = playerValue <= maxBudget;
-      const riskMatch = selectedRisk === "All" || d.transfer_risk_level === selectedRisk;
+      const riskMatch =
+        selectedRisk === "All" || d.transfer_risk_level === selectedRisk;
       const injuryMatch = !excludeInjuryProne || d.injury_prone === "No";
 
       return positionMatch && budgetMatch && riskMatch && injuryMatch;
@@ -114,12 +120,16 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
+    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
       <h1>FIFA Performance Dashboard</h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
-        
-        
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+          gap: "2rem",
+        }}
+      >
         <div className="card">
           <h3>Player Age Distribution</h3>
           {fifaData.length > 0 ? (
@@ -142,20 +152,60 @@ function App() {
             <p>Loading dataset...</p>
           )}
         </div>
-
-
       </div>
-          <PositionLegend />
-      <div className="card" style={{ marginTop: '2rem' }}>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr",
+          gap: "2rem",
+          marginTop: "2rem",
+        }}
+      >
+        <div className="card">
+          <h3>Market Value vs. Age by Position</h3>
+          {fifaData.length > 0 ? (
+            <ValuePositionScatter data={fifaData} />
+          ) : (
+            <p>Loading dataset...</p>
+          )}
+        </div>
+
+        <div className="card">
+          <h3>Attackers: Goals + Assists vs. Market Value</h3>
+          <p
+            style={{ color: "#9ca3af", fontSize: "14px", marginTop: "-0.3rem" }}
+          >
+            Compares RW, LW, and ST players by total goal contributions and
+            market value.
+          </p>
+          {fifaData.length > 0 ? (
+            <GoalsAssistsValueScatter data={fifaData} />
+          ) : (
+            <p>Loading dataset...</p>
+          )}
+        </div>
+      </div>
+
+      <PositionLegend />
+          
+      <div className="card" style={{ marginTop: "2rem" }}>
         <h3>Scouting Filters</h3>
 
         <p style={{ color: "#9ca3af", marginBottom: "0.5rem" }}>
           Select a position, or choose All to compare the full market:
         </p>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "12px", marginBottom: "1.2rem" }}>
-          {positions.map(position => (
-            <label 
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "12px",
+            marginBottom: "1.2rem",
+          }}
+        >
+          {positions.map((position) => (
+            <label
               key={position}
               style={{
                 color: "#e5e7eb",
@@ -163,7 +213,7 @@ function App() {
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
-                gap: "5px"
+                gap: "5px",
               }}
             >
               <input
@@ -179,8 +229,14 @@ function App() {
         </div>
 
         {selectedPosition && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
-            
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: "1rem",
+              marginBottom: "1rem",
+            }}
+          >
             <div>
               <label style={{ color: "#e5e7eb", fontSize: "14px" }}>
                 Max Budget: €{maxBudget}M
@@ -196,18 +252,24 @@ function App() {
             </div>
 
             <div>
-              <p style={{ color: "#e5e7eb", fontSize: "14px", margin: "0 0 0.4rem 0" }}>
+              <p
+                style={{
+                  color: "#e5e7eb",
+                  fontSize: "14px",
+                  margin: "0 0 0.4rem 0",
+                }}
+              >
                 Transfer Risk:
               </p>
 
-              {["All", "Low", "Medium", "High"].map(risk => (
+              {["All", "Low", "Medium", "High"].map((risk) => (
                 <label
                   key={risk}
                   style={{
                     color: "#e5e7eb",
                     fontSize: "14px",
                     marginRight: "12px",
-                    cursor: "pointer"
+                    cursor: "pointer",
                   }}
                 >
                   <input
@@ -216,28 +278,40 @@ function App() {
                     value={risk}
                     checked={selectedRisk === risk}
                     onChange={() => handleRiskChange(risk)}
-                  />
-                  {" "}{risk}
+                  />{" "}
+                  {risk}
                 </label>
               ))}
             </div>
 
             <div>
-              <label style={{ color: "#e5e7eb", fontSize: "14px", cursor: "pointer" }}>
+              <label
+                style={{
+                  color: "#e5e7eb",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={excludeInjuryProne}
                   onChange={handleInjuryChange}
-                />
-                {" "}Exclude injury-prone players
+                />{" "}
+                Exclude injury-prone players
               </label>
             </div>
-
           </div>
         )}
 
         {selectedPosition && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "1rem",
+            }}
+          >
             <p style={{ color: "#9ca3af", margin: 0 }}>
               {!selectedPosition
                 ? "Select a position or All to display players."
@@ -254,7 +328,7 @@ function App() {
                 border: "1px solid #374151",
                 backgroundColor: "#1f2937",
                 color: "#e5e7eb",
-                cursor: "pointer"
+                cursor: "pointer",
               }}
             >
               Reset Filters
@@ -264,13 +338,13 @@ function App() {
 
         <h3>Scouting Map: Overall Rating vs. Market Value</h3>
 
-
         <p style={{ color: "#9ca3af", fontSize: "14px", marginTop: "-0.3rem" }}>
-          The best value zone highlights players with stronger ratings and lower market values within the current filters.
+          The best value zone highlights players with stronger ratings and lower
+          market values within the current filters.
         </p>
 
         {fifaData.length > 0 ? (
-          <RatingValueScatter 
+          <RatingValueScatter
             data={scoutingData}
             onSelect={setSelectedPlayers}
           />
@@ -279,10 +353,10 @@ function App() {
         )}
       </div>
 
-      <div className="card" style={{ marginTop: '2rem' }}>
+      <div className="card" style={{ marginTop: "2rem" }}>
         <h3>Selected Players / Best Value Targets</h3>
         {fifaData.length > 0 ? (
-          <PlayerTable 
+          <PlayerTable
             data={scoutingData}
             selectedPlayers={selectedPlayers}
             selectedPosition={selectedPosition}
@@ -291,7 +365,6 @@ function App() {
           <p>Loading dataset...</p>
         )}
       </div>
-
     </div>
   );
 }
