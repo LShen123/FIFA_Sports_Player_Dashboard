@@ -2,8 +2,8 @@
 import { useState, useEffect, useMemo } from "react";
 import * as d3 from "d3";
 import AgeHistogram from "./components/AgeHistogram";
-import PositionBarChart from './components/PositionBarChart';
-import PositionLegend from './components/PositionLegend';
+import PositionBarChart from "./components/PositionBarChart";
+import PositionLegend from "./components/PositionLegend";
 import RatingValueScatter from "./components/RatingValueScatter";
 import ValuePositionScatter from "./components/ValuePositionScatter";
 import GoalsAssistsValueScatter from "./components/GoalsAssistsValueScatter";
@@ -41,12 +41,14 @@ function App() {
   const filteredData = useMemo(() => {
     // If no bins are selected, return all data
     if (selectedAgeRanges.length === 0) return fifaData;
-    return fifaData.filter(d => {
+    return fifaData.filter((d) => {
       const age = +d.age;
       // Keep the player if their age falls within ANY of the selected ranges
-      return selectedAgeRanges.some(range => age >= range[0] && age < range[1]);
+      return selectedAgeRanges.some(
+        (range) => age >= range[0] && age < range[1],
+      );
     });
-  }, [fifaData, selectedAgeRanges])
+  }, [fifaData, selectedAgeRanges]);
 
   // Get all available positions from the dataset
   const positions = useMemo(() => {
@@ -80,11 +82,11 @@ function App() {
       return;
     }
 
-    setSelectedAgeRanges(prev => {
-      const exists = prev.some(r => r[0] === range[0] && r[1] === range[1]);
+    setSelectedAgeRanges((prev) => {
+      const exists = prev.some((r) => r[0] === range[0] && r[1] === range[1]);
 
       if (exists) {
-        return prev.filter(r => !(r[0] === range[0] && r[1] === range[1]));
+        return prev.filter((r) => !(r[0] === range[0] && r[1] === range[1]));
       } else {
         return [...prev, range];
       }
@@ -122,11 +124,13 @@ function App() {
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
       <h1>FIFA Performance Dashboard</h1>
-      <p style={{ color: "#9ca3af", marginBottom: "2rem", marginTop: "-0.5rem" }}>
-        This dashboard contains an analysis of the following dataset: {" "}
-        <a 
-          href="https://www.kaggle.com/datasets/itszubi/fifa-player-performance-and-market-value" 
-          target="_blank" 
+      <p
+        style={{ color: "#9ca3af", marginBottom: "2rem", marginTop: "-0.5rem" }}
+      >
+        This dashboard contains an analysis of the following dataset:{" "}
+        <a
+          href="https://www.kaggle.com/datasets/itszubi/fifa-player-performance-and-market-value"
+          target="_blank"
           rel="noopener noreferrer"
           style={{ color: "#60a5fa", textDecoration: "underline" }}
         >
@@ -143,10 +147,10 @@ function App() {
         <div className="card">
           <h3>Player Age Distribution</h3>
           {fifaData.length > 0 ? (
-            <AgeHistogram 
-              data={fifaData} 
+            <AgeHistogram
+              data={fifaData}
               selectedRange={selectedAgeRanges}
-              onBinSelect={handleAgeSelect} 
+              onBinSelect={handleAgeSelect}
             />
           ) : (
             <p>Loading dataset...</p>
@@ -155,9 +159,7 @@ function App() {
         <div className="card">
           <h3>Position Distribution</h3>
           {fifaData.length > 0 ? (
-            <PositionBarChart data={filteredData} 
-              fullData={fifaData}
-            />
+            <PositionBarChart data={filteredData} fullData={fifaData} />
           ) : (
             <p>Loading dataset...</p>
           )}
@@ -184,12 +186,6 @@ function App() {
 
         <div className="card">
           <h3>Attackers: Goals + Assists vs. Market Value</h3>
-          <p
-            style={{ color: "#9ca3af", fontSize: "14px", marginTop: "-0.3rem" }}
-          >
-            Compares RW, LW, and ST players by total goal contributions and
-            market value.
-          </p>
           {fifaData.length > 0 ? (
             <GoalsAssistsValueScatter data={fifaData} />
           ) : (
@@ -198,7 +194,6 @@ function App() {
         </div>
       </div>
 
-          
       <div className="card" style={{ marginTop: "2rem" }}>
         <h3>Scouting Filters</h3>
 

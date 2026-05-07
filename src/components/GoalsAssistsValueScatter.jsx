@@ -1,8 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
+
+const POSITIONS = ["RW", "LW", "ST"];
+const POSITION_COLORS = {
+  RW: "#7f7f7f",
+  LW: "#8c564b",
+  ST: "#bcbd22",
+};
 
 export default function GoalsAssistsValueScatter({ data }) {
   const svgRef = useRef();
+  const [selectedPosition, setSelectedPosition] = useState("RW");
 
   useEffect(() => {
     const width = 1100;
@@ -18,7 +26,7 @@ export default function GoalsAssistsValueScatter({ data }) {
       .style("display", "block")
       .style("margin", "0 auto");
 
-    const attackers = new Set(["RW", "LW", "ST"]);
+    const attackers = new Set(POSITIONS);
 
     if (!data || data.length === 0) {
       svg
@@ -48,6 +56,7 @@ export default function GoalsAssistsValueScatter({ data }) {
       .filter(
         (d) =>
           attackers.has(d.position) &&
+          d.position === selectedPosition &&
           !isNaN(d.contribution) &&
           !isNaN(d.marketValue) &&
           d.contribution >= 0 &&
@@ -63,7 +72,7 @@ export default function GoalsAssistsValueScatter({ data }) {
         .attr("fill", "#9ca3af")
         .attr("font-size", "16px")
         .text(
-          "No RW, LW, or ST players found with valid goals, assists, and market value.",
+          "No selected positions found with valid goals, assists, and market value.",
         );
 
       return;
@@ -86,8 +95,8 @@ export default function GoalsAssistsValueScatter({ data }) {
 
     const colorScale = d3
       .scaleOrdinal()
-      .domain(["RW", "LW", "ST"])
-      .range(["#7f7f7f", "#8c564b", "#bcbd22"]);
+      .domain(POSITIONS)
+      .range(POSITIONS.map((position) => POSITION_COLORS[position]));
 
     const tooltip = d3
       .select("body")
@@ -174,46 +183,63 @@ export default function GoalsAssistsValueScatter({ data }) {
       .attr("font-size", "14px")
       .text("Market Value (Million €)");
 
-    svg
-      .append("text")
-      .attr("x", margin.left)
-      .attr("y", 24)
-      .attr("fill", "#9ca3af")
-      .attr("font-size", "13px")
-      .text("Attackers only: RW, LW, and ST.");
-
-    const legend = svg
-      .append("g")
-      .attr(
-        "transform",
-        `translate(${width - margin.right + 25}, ${margin.top + 10})`,
-      );
-
-    ["RW", "LW", "ST"].forEach((position, index) => {
-      const row = legend
-        .append("g")
-        .attr("transform", `translate(0, ${index * 24})`);
-
-      row
-        .append("rect")
-        .attr("width", 12)
-        .attr("height", 12)
-        .attr("rx", 3)
-        .attr("fill", colorScale(position));
-
-      row
-        .append("text")
-        .attr("x", 18)
-        .attr("y", 10)
-        .attr("fill", "#d1d5db")
-        .attr("font-size", "12px")
-        .text(position);
-    });
-
     return () => {
       tooltip.remove();
     };
-  }, [data]);
+  }, [data, selectedPosition]);
 
-  return <svg ref={svgRef} />;
+  return (
+    <div>
+      <fieldset
+        style={{
+          border: "none",
+          margin: 0,
+          padding: 0,
+          display: "flex",
+          justifyContent: "center",
+          gap: "18px",
+          marginBottom: "12px",
+          flexWrap: "wrap",
+        }}
+      >
+        <legend
+          style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
+        >
+          Attacking positions
+        </legend>
+        {POSITIONS.map((position) => {
+          const isSelected = selectedPosition === position;
+
+          return (
+            <label
+              key={position}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                color: "#d1d5db",
+                cursor: "pointer",
+                fontSize: "13px",
+                padding: "2px 4px",
+              }}
+            >
+              <input
+                type="radio"
+                name="attacking-position"
+                value={position}
+                checked={isSelected}
+                onChange={() => setSelectedPosition(position)}
+                style={{
+                  accentColor: POSITION_COLORS[position],
+                  cursor: "pointer",
+                }}
+              />
+              {position}
+            </label>
+          );
+        })}
+      </fieldset>
+      <svg ref={svgRef} />
+    </div>
+  );
 }
